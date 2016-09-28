@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="GBK" ?>
+<project name="antbuild" basedir="."  default="run-test">
+	<!--定义变量 -->
+	<property name="src" value="src"/>
+	<property name="test" value="test"/>
+	<property name="libs" value="libs"/>
+	<property name="build" value="build"/>
+	<property name="testbuild" value="testbuild"/>
+	<property name="report" value="report"/>
+	<property name="report-xml" value="${report}/xml"/>
+	<property name="report-html" value="${report}/html"/>
+	<!--CLASSPATH环境-->
+	<path id="classpath.test">
+		<fileset dir="${libs}">
+			<include name="**/*.jar" />
+		</fileset>
+		<pathelement path="${build}"/>
+		<pathelement path="${testbuild}"/>
+	</path>
+	<target name="init">
+		<echo>开始创建目录</echo>
+		<mkdir dir="${bulid}"/>
+		<mkdir dir="${testbulid}"/>
+		<mkdir dir="${report}"/>
+	</target>
+	<target name="compile" depends="init">
+		<javac srcdir="${src}" destdir="${build}"/>
+	</target>
+	<target name="test-compile" depends="compile">
+			<javac srcdir="${test}" destdir="${testbuild}">
+				<classpath  refid="classpath.test"/>
+				</javac>
+		</target>
+	
+	<target name="run-test" depends="test-compile">
+		<mkdir dir="${report-xml}"/>
+		<mkdir dir="${report-html}"/>
+	    <junit printsummary="on" failureproperty="test_fail">
+	    	<classpath refid="classpath.test"/>
+	    	<formatter type="xml"/>
+	    	<batchtest todir="${report-xml}">
+	    		<fileset dir="${test}" includes="**/*.java"/>
+	    	</batchtest>
+	    </junit>
+		<junitreport todir="${report-html}">
+			<fileset dir="${report-xml}" includes="**/*.xml"/>
+			<report format="frames" todir="${report-html}"/>
+		</junitreport>
+		
+		<fail>
+			<condition>
+				<isset property="test_fail"/>
+				</condition>
+		</fail>
+			
+	</target>
+	
+</project>	
